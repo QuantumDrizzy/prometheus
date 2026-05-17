@@ -158,51 +158,34 @@ def print_table(results: list[BenchmarkResult]) -> None:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="Qwen/Qwen2.5-1.5B")
-    parser.add_argument("--batch_size", type=int, default=2)
-    parser.add_argument("--seq_len", type=int, default=2048)
+    parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--seq_len", type=int, default=1024)
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--output", type=str, default="benchmarks/results.json")
+    # One strategy per torchrun invocation — keeps NCCL state clean between runs
+    parser.add_argument("--strategy", type=str, default="FULL_SHARD",
+                        choices=["SHARD_GRAD_OP", "FULL_SHARD", "HYBRID_SHARD"])
+    parser.add_argument("--grad_ckpt", action="store_true", default=False)
     args = parser.parse_args()
 
     rank, world_size = setup_distributed()
 
-    strategy_batch = {
-        "SHARD_GRAD_OP": args.batch_size,
-        "FULL_SHARD":    args.batch_size,
-        "HYBRID_SHARD":  args.batch_size,
-    }
-
-    # NO_SHARD (DDP equivalent) excluded: keeps full model+grads+optim on each
-    # GPU — consistently OOMs on 16GB cards with 1.5B+ models at seq_len=2048.
-    strategies: list[str] = ["SHARD_GRAD_OP", "FULL_SHARD"]
-    if world_size > 1:
-        strategies.append("HYBRID_SHARD")
+    if is_main_process():
+        logger.info(f"Benchmarking: {args.strategy} grad_ckpt={args.grad_ckpt}")
 
     results: list[BenchmarkResult] = []
-
-    for strategy in strategies:
-        for grad_ckpt in [False, True]:
-            if is_main_process():
-                logger.info(f"Benchmarking: {strategy} grad_ckpt={grad_ckpt}")
-            try:
-                r = run_benchmark(
-                    model_name=args.model,
-                    strategy=strategy,
-                    batch_size=strategy_batch[strategy],
-                    seq_len=args.seq_len,
-                    grad_checkpointing=grad_ckpt,
-                    flash_attn=True,
-                    warmup_steps=args.warmup,
-                    bench_steps=args.steps,
-                )
-                results.append(r)
-            except torch.cuda.OutOfMemoryError:
-                if is_main_process():
-                    logger.warning(f"OOM: {strategy} grad_ckpt={grad_ckpt} batch={strategy_batch[strategy]}")
-            except Exception as e:
-                if is_main_process():
-                    logger.warning(f"FAILED: {strategy} grad_ckpt={grad_ckpt} — {type(e).__name__}: {e}")
+    r = run_benchmark(
+        model_name=args.model,
+        strategy=args.strategy,
+        batch_size=args.batch_size,
+        seq_len=args.seq_len,
+        grad_checkpointing=args.grad_ckpt,
+        flash_attn=True,
+        warmup_steps=args.warmup,
+        bench_steps=args.steps,
+    )
+    results.append(r)
 
     if is_main_process():
         if results:
