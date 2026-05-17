@@ -205,11 +205,14 @@ def main():
                     logger.warning(f"FAILED: {strategy} grad_ckpt={grad_ckpt} — {type(e).__name__}: {e}")
 
     if is_main_process():
-        print_table(results)
-        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        with open(args.output, "w") as f:
-            json.dump([asdict(r) for r in results], f, indent=2)
-        logger.info(f"Results saved → {args.output}")
+        if results:
+            print_table(results)
+            Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+            with open(args.output, "w") as f:
+                json.dump([asdict(r) for r in results], f, indent=2)
+            logger.info(f"Results saved → {args.output}")
+        else:
+            logger.error("All benchmarks failed (OOM or error). Try --batch_size 1 --seq_len 1024")
 
     teardown_distributed()
 
