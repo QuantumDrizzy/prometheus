@@ -167,15 +167,15 @@ def main():
 
     rank, world_size = setup_distributed()
 
-    # NO_SHARD keeps full model on each GPU — needs smaller batch
     strategy_batch = {
-        "NO_SHARD":      max(1, args.batch_size // 2),
         "SHARD_GRAD_OP": args.batch_size,
         "FULL_SHARD":    args.batch_size,
         "HYBRID_SHARD":  args.batch_size,
     }
 
-    strategies: list[str] = ["NO_SHARD", "SHARD_GRAD_OP", "FULL_SHARD"]
+    # NO_SHARD (DDP equivalent) excluded: keeps full model+grads+optim on each
+    # GPU — consistently OOMs on 16GB cards with 1.5B+ models at seq_len=2048.
+    strategies: list[str] = ["SHARD_GRAD_OP", "FULL_SHARD"]
     if world_size > 1:
         strategies.append("HYBRID_SHARD")
 
@@ -199,7 +199,10 @@ def main():
                 results.append(r)
             except torch.cuda.OutOfMemoryError:
                 if is_main_process():
-                    logger.warning(f"OOM: {strategy} grad_ckpt={grad_ckpt} batch={args.batch_size}")
+                    logger.warning(f"OOM: {strategy} grad_ckpt={grad_ckpt} batch={strategy_batch[strategy]}")
+            except Exception as e:
+                if is_main_process():
+                    logger.warning(f"FAILED: {strategy} grad_ckpt={grad_ckpt} — {type(e).__name__}: {e}")
 
     if is_main_process():
         print_table(results)

@@ -70,6 +70,10 @@ def load_base_model(cfg: "ModelConfig") -> nn.Module:
             low_cpu_mem_usage=True,
         )
 
+    # Disable KV cache — required for activation checkpointing
+    # (cache changes shape between forward and recompute passes)
+    model.config.use_cache = False
+
     n_params = sum(p.numel() for p in model.parameters())
     logger.info(f"Loaded {cfg.name_or_path} | {n_params/1e9:.2f}B params")
     return model
