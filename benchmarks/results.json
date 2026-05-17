@@ -1,0 +1,28 @@
+[
+  {
+    "strategy": "FULL_SHARD",
+    "grad_checkpointing": false,
+    "flash_attn": true,
+    "batch_size": 1,
+    "seq_len": 1024,
+    "world_size": 2,
+    "tokens_per_sec": 406.04104839178166,
+    "peak_vram_gb": 12.260436992,
+    "mfu": 0.018804341232406485,
+    "step_time_ms": 5043.8244982000015,
+    "n_params_b": 1.543714304
+  },
+  {
+    "strategy": "FULL_SHARD",
+    "grad_checkpointing": true,
+    "flash_attn": true,
+    "batch_size": 1,
+    "seq_len": 1024,
+    "world_size": 2,
+    "tokens_per_sec": 303.73151297378655,
+    "peak_vram_gb": 8.140750848,
+    "mfu": 0.014066240434595876,
+    "step_time_ms": 6742.796631200008,
+    "n_params_b": 1.543714304
+  }
+]
