@@ -111,6 +111,6 @@ Results populate in `benchmarks/results.json`.
   author = {Antonio},
   title  = {PROMETHEUS: Distributed LLM Training with PyTorch FSDP},
   year   = {2026},
-  url    = {https://github.com/antonio-f/prometheus}
+  url    = {https://github.com/QuantumDrizzy/prometheus}
 }
 ```
