@@ -161,19 +161,27 @@ def apply_activation_checkpointing(model: FSDP) -> None:
     Must be called AFTER FSDP wrapping.
     """
     from torch.distributed.algorithms._checkpoint.checkpoint_wrapper import (
-        CheckpointImpl,
         apply_activation_checkpointing as _apply_ac,
         checkpoint_wrapper,
     )
 
     check_fn = lambda submodule: isinstance(submodule, FSDP)
 
-    _apply_ac(
-        model,
-        checkpoint_impl=CheckpointImpl.NO_REENTRANT,
-        checkpoint_wrapper_fn=checkpoint_wrapper,
-        check_fn=check_fn,
-    )
+    # PyTorch 2.4+ removed checkpoint_impl parameter
+    try:
+        from torch.distributed.algorithms._checkpoint.checkpoint_wrapper import CheckpointImpl
+        _apply_ac(
+            model,
+            checkpoint_impl=CheckpointImpl.NO_REENTRANT,
+            checkpoint_wrapper_fn=checkpoint_wrapper,
+            check_fn=check_fn,
+        )
+    except TypeError:
+        _apply_ac(
+            model,
+            checkpoint_wrapper_fn=checkpoint_wrapper,
+            check_fn=check_fn,
+        )
     logger.info("Activation checkpointing applied.")
 
 

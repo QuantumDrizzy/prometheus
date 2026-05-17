@@ -167,6 +167,14 @@ def main():
 
     rank, world_size = setup_distributed()
 
+    # NO_SHARD keeps full model on each GPU — needs smaller batch
+    strategy_batch = {
+        "NO_SHARD":      max(1, args.batch_size // 2),
+        "SHARD_GRAD_OP": args.batch_size,
+        "FULL_SHARD":    args.batch_size,
+        "HYBRID_SHARD":  args.batch_size,
+    }
+
     strategies: list[str] = ["NO_SHARD", "SHARD_GRAD_OP", "FULL_SHARD"]
     if world_size > 1:
         strategies.append("HYBRID_SHARD")
@@ -181,7 +189,7 @@ def main():
                 r = run_benchmark(
                     model_name=args.model,
                     strategy=strategy,
-                    batch_size=args.batch_size,
+                    batch_size=strategy_batch[strategy],
                     seq_len=args.seq_len,
                     grad_checkpointing=grad_ckpt,
                     flash_attn=True,
