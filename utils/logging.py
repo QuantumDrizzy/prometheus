@@ -99,7 +99,7 @@ class Throughput:
 
 # GPU peak BF16 FLOP/s for common cards
 GPU_FLOPS = {
-    "RTX 5060 Ti": 330e12,
+    "RTX 5060 Ti":  330e12,
     "RTX 4090": 330e12,
     "RTX 4080": 244e12,
     "A100 SXM 80GB": 312e12,

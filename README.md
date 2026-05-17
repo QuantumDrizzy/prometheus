@@ -2,9 +2,7 @@
 
 **Distributed LLM pretraining with PyTorch FSDP.**
 
-PROMETHEUS is a research-grade training framework demonstrating full-stack distributed training: FSDP ZeRO-3, activation checkpointing, Flash Attention 2, MFU tracking, and FSDP-aware checkpointing — designed to scale from a single RTX 5060 Ti up to multi-node GPU clusters via SLURM.
-
-Part of the [iNFAMØUS OS](https://github.com/infamous-os) research stack, alongside [SUBSTRATE](https://github.com/infamous-os/substrate) and [SESHAT](https://arxiv.org/abs/xxxx.xxxxx).
+Research-grade distributed training framework: FSDP ZeRO-3, activation checkpointing, Flash Attention 2, MFU tracking, and FSDP-aware checkpointing — scales from a single GPU up to multi-node clusters via SLURM.
 
 ---
 
@@ -88,11 +86,10 @@ Results populate in `benchmarks/results.json`.
 
 ## Roadmap
 
-- [ ] Run full benchmark on 4xA10G (Lambda Cloud) and commit results
+- [ ] Run full benchmark on 2xT4 (Kaggle) and commit results
 - [ ] LoRA / QLoRA fine-tuning mode
-- [ ] DPO training loop (alignment research track)
+- [ ] DPO training loop
 - [ ] Mixture of Experts (MoE) FSDP wrapping
-- [ ] Integration with SESHAT sparse attention kernel
 
 ---
 
@@ -100,7 +97,7 @@ Results populate in `benchmarks/results.json`.
 
 | Config | Min GPUs | VRAM/GPU | Notes |
 |--------|----------|----------|-------|
-| qwen_1b (dev) | 1 | 16 GB | Local RTX 5060 Ti |
+| qwen_1b (dev) | 1 | 16 GB | Single GPU local |
 | qwen_1b (full) | 4 | 16 GB | Single node |
 | qwen_7b | 4 | 24 GB | A10G or better |
 | qwen_7b (2-node) | 8 | 24 GB | SLURM |
@@ -114,6 +111,6 @@ Results populate in `benchmarks/results.json`.
   author = {Antonio},
   title  = {PROMETHEUS: Distributed LLM Training with PyTorch FSDP},
   year   = {2026},
-  url    = {https://github.com/infamous-os/prometheus}
+  url    = {https://github.com/antonio-f/prometheus}
 }
 ```

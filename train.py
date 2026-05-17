@@ -1,15 +1,9 @@
 """
 PROMETHEUS — Main training entry point
 
-Usage:
-  Single GPU (dev):
-    python train.py --config configs/qwen_1b.yaml
-
-  Multi-GPU (torchrun):
-    torchrun --nproc_per_node=4 train.py --config configs/qwen_1b.yaml
-
-  SLURM:
-    sbatch scripts/slurm.sh
+Single GPU:   python train.py --config configs/qwen_1b.yaml
+Multi-GPU:    torchrun --nproc_per_node=4 train.py --config configs/qwen_1b.yaml
+SLURM:        sbatch scripts/slurm.sh
 """
 from __future__ import annotations
 import argparse
