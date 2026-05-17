@@ -1,0 +1,27 @@
+# PROMETHEUS — Dependencies
+# Install: pip install -r requirements.txt
+# Optional Flash Attention 2: pip install flash-attn --no-build-isolation
+
+# Core
+torch>=2.3.0
+transformers>=4.40.0
+datasets>=2.18.0
+tokenizers>=0.19.0
+
+# Config
+pyyaml>=6.0
+
+# Data
+numpy>=1.26.0
+
+# Logging (optional but recommended)
+wandb>=0.17.0
+
+# Profiling
+tensorboard>=2.15.0
+
+# Distributed checkpoint (PyTorch 2.2+)
+# Already included in torch
+
+# Flash Attention 2 (optional, Linux only, significant speedup)
+# pip install flash-attn --no-build-isolation

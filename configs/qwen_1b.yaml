@@ -1,0 +1,50 @@
+# PROMETHEUS — Qwen2.5-1.5B config
+# Optimized for 1-4x GPU training (16GB VRAM each)
+# Single GPU: python train.py --config configs/qwen_1b.yaml
+# 4xGPU:      torchrun --nproc_per_node=4 train.py --config configs/qwen_1b.yaml
+
+model:
+  name_or_path: "Qwen/Qwen2.5-1.5B"
+  max_seq_len: 2048
+  flash_attn: true
+  gradient_checkpointing: true
+
+fsdp:
+  sharding_strategy: "FULL_SHARD"        # ZeRO-3: minimum VRAM per GPU
+  cpu_offload: false
+  mixed_precision: "bf16"
+  min_num_params: 1000000
+  use_orig_params: true
+
+data:
+  dataset_name: "HuggingFaceFW/fineweb-edu"
+  dataset_config: "sample-10BT"
+  text_column: "text"
+  pack_sequences: true
+  num_workers: 4
+
+optimizer:
+  lr: 3.0e-4
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-8
+  grad_clip: 1.0
+
+scheduler:
+  warmup_steps: 100
+  total_steps: 10000
+  min_lr_ratio: 0.1
+
+batch_size_per_gpu: 4
+gradient_accumulation_steps: 8
+max_steps: 10000
+eval_every: 500
+save_every: 1000
+log_every: 10
+
+output_dir: "./checkpoints/qwen_1b"
+run_name: "prometheus-qwen-1b"
+seed: 42
+compile: false                           # Enable on Linux only
+profile_steps: 0

@@ -1,0 +1,50 @@
+# PROMETHEUS — Qwen2.5-7B config
+# Requires 4+ GPUs with 16-24GB VRAM
+# torchrun --nproc_per_node=4 train.py --config configs/qwen_7b.yaml
+# For single node, 8xA10G on Lambda/Runpod: world_size=8
+
+model:
+  name_or_path: "Qwen/Qwen2.5-7B"
+  max_seq_len: 4096
+  flash_attn: true
+  gradient_checkpointing: true
+
+fsdp:
+  sharding_strategy: "FULL_SHARD"
+  cpu_offload: false                     # Enable if OOM on 16GB GPUs
+  mixed_precision: "bf16"
+  min_num_params: 1000000
+  use_orig_params: true
+
+data:
+  dataset_name: "HuggingFaceFW/fineweb-edu"
+  dataset_config: "sample-100BT"
+  text_column: "text"
+  pack_sequences: true
+  num_workers: 8
+
+optimizer:
+  lr: 2.0e-4
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-8
+  grad_clip: 1.0
+
+scheduler:
+  warmup_steps: 200
+  total_steps: 20000
+  min_lr_ratio: 0.1
+
+batch_size_per_gpu: 2
+gradient_accumulation_steps: 16         # Effective batch ≈ 2M tokens at 8 GPUs
+max_steps: 20000
+eval_every: 1000
+save_every: 2000
+log_every: 10
+
+output_dir: "./checkpoints/qwen_7b"
+run_name: "prometheus-qwen-7b"
+seed: 42
+compile: true                            # Recommended on Linux/A100+
+profile_steps: 0
